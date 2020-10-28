@@ -7,6 +7,7 @@ import SendIcon from '@material-ui/icons/Send';
 import AttachFileSharpIcon from '@material-ui/icons/AttachFileSharp';
 import SearchIcon from '@material-ui/icons/Search';
 import Pusher from 'pusher-js';
+import moment from 'moment'
 
 
 
@@ -183,13 +184,13 @@ function Chatarea({ user, chatData }) {
     return (
 
         <div className={classes.root}>
-            <Box display="flex" justifyContent="space-between" flexWrap="nowrap" p={1.2} alignItems="center" className={classes.header}>
+            <Box display="flex" justifyContent="space-between" flexWrap="nowrap" p={1.8} alignItems="center" className={classes.header}>
 
                 <Box display="flex" alignItems="center">
                     <Avatar>R</Avatar>
                     <Box ml={1}>
                         <Box fontWeight="fontWeightBold">{chatData.name}</Box>
-                        <Box fontWeight="fontWeightRegular" color="gray">last seen {chatData.createdAt}</Box>
+                        <Box fontWeight="fontWeightRegular" color="gray">last seen {moment.duration(1, "minutes").humanize()} ago</Box>
                     </Box>
                 </Box>
                 <Box display="none">

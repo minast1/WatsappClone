@@ -92,6 +92,10 @@ export default function Header({ user, chatItems, chatTrigger }) {
 
                 </Box>
             </Box>
+
+            <Box pt={4}>
+
+            </Box>
             { chatItems.map((chat) =>
 
                 <Box p={2} className={classes.chats} key={chat.id} onClick={(e) => {
