@@ -1,0 +1,28 @@
+{
+  "name": "frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@material-ui/core": "^4.11.0",
+    "@material-ui/icons": "^4.9.1",
+    "@prisma/client": "^2.9.0",
+    "formidable-serverless": "^1.0.3",
+    "moment": "^2.29.1",
+    "next": "9.5.4-canary.23",
+    "next-auth": "^3.1.0",
+    "pg": "^8.4.0",
+    "postgres": "^1.0.2",
+    "pusher": "^3.0.1",
+    "pusher-js": "^7.0.0",
+    "react": "16.13.1",
+    "react-dom": "16.13.1"
+  },
+  "devDependencies": {
+    "@prisma/cli": "^2.9.0"
+  }
+}

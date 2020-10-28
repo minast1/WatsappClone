@@ -1,0 +1,17 @@
+{
+  "version": "0.3.14-fixed",
+  "steps": [
+    {
+      "tag": "UpdateField",
+      "model": "Chat",
+      "field": "owner",
+      "arity": "Optional"
+    },
+    {
+      "tag": "UpdateField",
+      "model": "Chat",
+      "field": "userId",
+      "arity": "Optional"
+    }
+  ]
+}
