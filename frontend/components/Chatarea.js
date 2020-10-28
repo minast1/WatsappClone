@@ -99,8 +99,8 @@ function Chatarea({ user, chatData }) {
     /*
    useEffect(() => {
 
-       const pusher = new Pusher('362d80c1d5cab29dc782', {
-           cluster: 'eu'
+       const pusher = new Pusher(process.env.PUSHER_KEY, {
+           cluster: process.env.PUSHER_CLUSTER
        });
 
        const channel = pusher.subscribe('messages');
@@ -113,10 +113,6 @@ function Chatarea({ user, chatData }) {
 
        }
    }, [chatData]) */
-
-    const grabFile = () => {
-        //setmessageFile(inputEl.current?.files[0])
-    }
 
 
     const submitMessage = (message, id) => {
