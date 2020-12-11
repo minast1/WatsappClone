@@ -10,7 +10,7 @@ import Chatarea from '../components/Chatarea'
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import Divider from '@material-ui/core/Divider';
 import AccessDenied from '../components/AccessDenied'
-
+import useSWR from 'swr'
 
 
 
@@ -37,10 +37,20 @@ const useStyles = makeStyles((theme) => ({
     }
 }))
 
+const fetcher = async (uri) => {
+    const res = await fetch(uri)
+    const data = await res.json();
+    return data
+}
+export { fetcher }
 
-const Home = ({ data, session }) => {
-
-    const [chat, setchat] = useState([])
+const Home = ({ chats, session }) => {
+    const { data } = useSWR('api/chats/all', fetcher, {
+        initialData: chats,
+        revalidateOnFocus: false
+    })
+    // console.log(data)
+    const [chat, setchat] = useState({})
     const classes = useStyles()
 
     if (!session) {
@@ -60,8 +70,8 @@ const Home = ({ data, session }) => {
             <Box className={classes.main} my="auto">
                 <Card raised>
                     <div className={classes.container}>
-                        <Sidearea user={session.user} chatItems={data} chatTrigger={setchat} />
-                        <Chatarea user={session.user} chatData={chat} />
+                        <Sidearea user={session.user} getChat={setchat} />
+                        <Chatarea user={session.user} chat={chat} />
                     </div>
                 </Card>
             </Box>
@@ -82,14 +92,14 @@ export async function getServerSideProps(context) {
         }
     })
 
-    const data = await res.json();
+    const chats = await res.json();
 
 
     //req.headers.cookies = session;
     return {
         props: {
             session,
-            data
+            chats
 
         }, // will be passed to the page component as props
     }

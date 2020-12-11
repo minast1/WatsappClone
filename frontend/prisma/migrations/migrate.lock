@@ -8,3 +8,5 @@
 20201026210739-make_userid_field_nullable_on_files
 20201026211156-reapply_optional_fields
 20201027005830-add_boolean_field_to_messages
+20201209133802-create_users_on_chats_table
+20201209144054-update_create_users_on_chats_table

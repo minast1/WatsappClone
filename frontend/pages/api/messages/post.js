@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import prisma from '../../../src/prisma'
 import { getSession } from 'next-auth/client'
 import fs from 'fs'
 import path from 'path'
@@ -6,9 +6,6 @@ import Pusher from 'pusher'
 const formidable = require('formidable-serverless');
 
 
-
-
-const prisma = new PrismaClient();
 
 const createMessage = async (user, message, id, check = false) => {
     const Chatmessage = await prisma.message.create({
@@ -26,15 +23,6 @@ const createMessage = async (user, message, id, check = false) => {
     Chatmessage.owner = user
     return Chatmessage
 }
-
-
-const pusher = new Pusher({
-    appId: process.env.PUSHER_ID,
-    key: process.env.NEXT_PUBLIC_PUSHER_KEY,
-    secret: process.env.PUSHER_SECRET,
-    cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
-    useTLS: true
-});
 
 
 

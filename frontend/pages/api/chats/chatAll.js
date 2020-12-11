@@ -1,5 +1,6 @@
-import { PrismaClient } from '@prisma/client'
-//import { getSession } from 'next-auth/client'
+import prisma from '../../../src/prisma'
+
+//import { getSession } from 'nex
 
 
 
@@ -8,8 +9,6 @@ export default async function handle(req, res) {
 
     // const session = await getSession({ req })
     const userEmail = req.query.email
-    const prisma = new PrismaClient()
-
     const UserChats = await prisma.chat.findMany({
         where: { owner: { email: userEmail } },
         include: {

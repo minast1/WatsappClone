@@ -1,14 +1,14 @@
 import React, { useState } from 'react'
 import { fade, makeStyles, withStyles } from '@material-ui/core/styles';
-
 import IconButton from '@material-ui/core/IconButton';
-
 import InputBase from '@material-ui/core/InputBase';
 import SearchIcon from '@material-ui/icons/Search';
-import { Avatar, Box, Divider } from '@material-ui/core';
+import { Avatar, Box, Divider, List, ListItem, ListItemAvatar, ListItemText, Typography } from '@material-ui/core';
 import DonutLargeSharpIcon from '@material-ui/icons/DonutLargeSharp';
 import ChatSharpIcon from '@material-ui/icons/ChatSharp';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
+import useSWR from 'swr';
+import { fetcher } from '../pages/home'
 
 
 const useStyles = makeStyles((theme) => ({
@@ -75,10 +75,18 @@ const useStyles = makeStyles((theme) => ({
 
 }));
 
+const getChatProfileImage = (array) => {
+    return array.length > 1 ? '/avatar-3.jpg' : array[0].participant.image
+}
 
 
-export default function Header({ user, chatItems, chatTrigger }) {
-    //console.log(chatItems)
+
+export default function Sidearea({ user, getChat }) {
+    const { data } = useSWR('/api/chats/all', fetcher, {
+        revalidateOnFocus: false
+    })
+    // console.log(data)
+
     const classes = useStyles();
 
     return (
@@ -93,23 +101,26 @@ export default function Header({ user, chatItems, chatTrigger }) {
                 </Box>
             </Box>
 
-            <Box pt={4}>
+            <List style={{ paddingTop: 4 }}>
 
-            </Box>
-            { chatItems.map((chat) =>
+                {data && data.map((el = { messages, id, name, owner, participants }) => (
 
-                <Box p={2} className={classes.chats} key={chat.id} onClick={(e) => {
-                    e.preventDefault();
-                    chatTrigger(chat)
-                }}>
-                    <Avatar src="/avatar-1.jpg" />
-                    <Box ml={2}>
-                        <Box fontWeight="fontWeightBold">{chat.name}</Box>
+                    <ListItem alignItems="flex-start" key={el.id} button onClick={() => { getChat(el) }}>
+                        <ListItemAvatar>
+                            <Avatar alt="Remy Sharp" src={getChatProfileImage(el.participants)} />
+                        </ListItemAvatar>
+                        <ListItemText
+                            primary={el.name}
+                            secondary={
+                                <React.Fragment>
+                                    {el.messages.length > 0 ? el.messages.slice(-1)[0].body : ''}
+                                </React.Fragment>
+                            }
+                        />
+                    </ListItem>
+                ))}
 
-                        <Box fontWeight="fontWeightRegular">{chat.messages.length > 0 ? chat.messages.slice(-1)[0].body : ''}</Box>
-                    </Box>
-                </Box>
-            )}
+            </List>
 
 
         </div>

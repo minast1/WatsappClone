@@ -8,7 +8,8 @@ import AttachFileSharpIcon from '@material-ui/icons/AttachFileSharp';
 import SearchIcon from '@material-ui/icons/Search';
 import Pusher from 'pusher-js';
 import moment from 'moment'
-
+import useSWR, { mutate } from 'swr'
+import fetcher from '../pages/home'
 
 
 
@@ -91,31 +92,13 @@ const getTime = (timestamp) => {
 }
 
 
-function Chatarea({ user, chatData }) {
+function Chatarea({ user, chat }) {
     const classes = useStyles()
     const inputEl = useRef(null);
-    const [message, setmessage] = useState("")
 
-    // const [messages, setmessages] = useState(initialState)
-    /*
-   useEffect(() => {
+    const { messages, participants, owner, name } = chat
 
-       const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
-           cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER
-       });
-
-       const channel = pusher.subscribe('messages');
-       channel.bind('inserted', function (data) {
-           chatData.messages = [...chatData.messages, data]
-
-       });
-       return () => {
-           channel.unbind();
-
-       }
-   }, [chatData]) */
-
-
+    //console.log(participants)
     const submitMessage = (message, id) => {
         // const body = { message, id }
 
@@ -159,10 +142,10 @@ function Chatarea({ user, chatData }) {
     }
 
 
-    if (chatData.length === 0) return (
+    if (!chat) return (
         <div className={classes.root}>
             <Box mx="auto" mt={10} display="flex" flexDirection="column" alignItems="center" className={classes.no_messages_area}>
-                <Avatar className={classes.large_avatar} src={user.picture} alt='img' />
+                <Avatar className={classes.large_avatar} src={owner?.name} alt='img' />
 
                 <Box mt={3} fontWeight="fontWeightLight" fontSize={30}>
                     Keep your phone connected
@@ -189,7 +172,7 @@ function Chatarea({ user, chatData }) {
                 <Box display="flex" alignItems="center">
                     <Avatar>R</Avatar>
                     <Box ml={1}>
-                        <Box fontWeight="fontWeightBold">{chatData.name}</Box>
+                        <Box fontWeight="fontWeightBold">{name}</Box>
                         <Box fontWeight="fontWeightRegular" color="gray">last seen {moment.duration(1, "minutes").humanize()} ago</Box>
                     </Box>
                 </Box>
@@ -206,11 +189,11 @@ function Chatarea({ user, chatData }) {
 
             <Box display="flex" m={1.5} flexDirection="column-reverse" className={classes.messages_area}>
 
-                {chatData && chatData.messages.map((message) =>
+                {messages && messages.map((message) =>
 
                     <Box p={1} alignSelf={message.owner.email === user.email ? 'flex-end' : 'flex-start'} key={message.id}>
                         <Box className={message.owner.email === user.email ? classes.sender_background : classes.reciever_background} fontWeight="fontWeightRegular" borderRadius={16} p={1} width="fit-content">
-                            <Box fontWeight={700} textAlign="right" fontSize={13}>{message.owner.name === user.name ? user.name : chatData.name}</Box>
+                            <Box fontWeight={700} textAlign="right" fontSize={13}>{message.owner.name === user.name ? user.name : owner.name}</Box>
                             {message.isFile ? <img src={`/${user.id}/${message.body}`} width="200px" /> : message.body}
                             <Box fontSize={11} textAlign="right" color="gray">{getTime(message.createdAt)}</Box>
                         </Box>
@@ -234,7 +217,7 @@ function Chatarea({ user, chatData }) {
                     }}
                     inputProps={{ 'aria-label': 'search' }}
                     fullWidth
-                    value={message}
+                    value=''
                     onChange={(e) => setmessage(e.target.value)}
                 />
 
@@ -242,7 +225,7 @@ function Chatarea({ user, chatData }) {
 
                     <Box onClick={(e) => {
                         e.preventDefault();
-                        submitMessage(message, chatData.id)
+                        submitMessage(chatData.id)
                         setmessage("")
                     }}><SendIcon /></Box>
                     <Box> <MicIcon /></Box>
