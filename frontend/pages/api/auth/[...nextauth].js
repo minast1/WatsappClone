@@ -71,13 +71,26 @@ const options = {
     callbacks: {
 
         session: async (session, user) => {
+
             session = user
+            // console.log(session)
+            const userId = await prisma.user.findUnique({
+                where: {
+                    email: session.user.email
+                },
+                select: {
+                    id: true
+                }
+            })
+            const { id } = userId
+            session.id = id
+
             return Promise.resolve(session)
         },
         jwt: async (token, user, account, profile, isNewUser) => {
             const isSignIn = (user) ? true : false;
             if (isSignIn) {
-                token.user = profile
+                token.user = user
             }
 
 

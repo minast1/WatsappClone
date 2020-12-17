@@ -7,20 +7,16 @@ const formidable = require('formidable-serverless');
 
 
 
-const createMessage = async (user, message, id, check = false) => {
+const createMessage = async (session, message, id, file) => {
     const Chatmessage = await prisma.message.create({
         data: {
-            body: message,
-            owner: {
-                connect: { email: user.email }
-            },
-            Chat: {
-                connect: { id: Number(id) }
-            },
-            isFile: check
+            body: message === '' ? null : message,
+            userId: session.id,
+            chatId: Number(id),
+            file: file === undefined ? null : file.name
         }
     })
-    Chatmessage.owner = user
+    Chatmessage.owner = session.user
     return Chatmessage
 }
 
@@ -33,13 +29,14 @@ export const config = {
 }
 
 export default async (req, res) => {
-    const { user } = await getSession({ req });
+    const session = await getSession({ req });
+    const { user } = session
 
-    fs.mkdir(`./public/${user.id}`, { recursive: true }, (err) => {
-        if (err) {
-            res.send(JSON.stringify(err))
-        }
-    })
+    // fs.mkdir(`./public/${user.id}`, { recursive: true }, (err) => {
+    //  if (err) {
+    //       res.send(JSON.stringify(err))
+    //   }
+    // })
     const data = await new Promise((resolve, reject) => {
         try {
             const form = new formidable.IncomingForm({
@@ -50,21 +47,16 @@ export default async (req, res) => {
             });
 
             form.parse(req, async (err, fields, files) => {
-                const { message, id } = fields
-                if (message) {
-                    const Chatmessage = await createMessage(user, message, id);
-                    res.json(Chatmessage)
-                }
+                const { message, id } = fields;
+                const { file } = files;
 
-                if (files) {
-                    const { file } = files;
-                    const clientExtension = file.name.split('.').pop()
-                    const filename = `${Date.now()}.${clientExtension}`
-                    fs.renameSync(file.path, `public/${user.id}/${filename}`)
-                    const Chatmessage = await createMessage(user, filename, id, true)
-                    res.json(Chatmessage)
-                }
+                if (file) {
 
+                    fs.renameSync(file.path, `public/${user.id}/${file.name}`)
+
+                }
+                const Chatmessage = await createMessage(session, message, id, file)
+                res.json(Chatmessage)
 
             })
         } catch (error) {

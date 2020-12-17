@@ -69,12 +69,12 @@ model VerificationRequest {
 
 model Message {
   id        Int      @id @default(autoincrement())
-  body      String
+  body      String?
   owner     User     @relation(fields: [userId], references: [id])
   userId    Int
   Chat      Chat?    @relation(fields: [chatId], references: [id])
   chatId    Int?
-  isFile    Boolean  @default(false)
+  file      String?
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @default(now()) @map(name: "updated_at")
 

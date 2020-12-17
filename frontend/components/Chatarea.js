@@ -1,4 +1,4 @@
-import { Avatar, Box, CardHeader, Chip, Divider, IconButton, InputBase, makeStyles, Typography } from '@material-ui/core';
+import { AppBar, Avatar, Box, ButtonBase, CardHeader, Chip, Divider, IconButton, InputBase, ListItemText, makeStyles, Paper, Toolbar, Typography } from '@material-ui/core';
 import React, { useState, useEffect, useRef } from 'react'
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import MoodIcon from '@material-ui/icons/Mood';
@@ -9,56 +9,57 @@ import SearchIcon from '@material-ui/icons/Search';
 import Pusher from 'pusher-js';
 import moment from 'moment'
 import useSWR, { mutate } from 'swr'
-import fetcher from '../pages/home'
+//import fetcher from '../pages/home'
+import MessageBox from './MessageBox'; import Welcome from './Welcome';
 
 
 
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        flex: 0.6,
+        flex: 0.7,
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column',
+        backgroundColor: '#101318',
     },
-    header: {
-        backgroundColor: '#ebebeb',
-        borderLeft: '1px solid lightgray'
+
+    searchChat: {
+        padding: '4px',
+
+        marginTop: theme.spacing(1),
+        //marginLeft: theme.spacing(2),
+        // marginRight: theme.spacing(2),
+        // marginBottom: theme.spacing(1),
+        display: 'flex',
+        alignItems: 'center',
+        //width: 400,
+        height: 45,
+        borderRadius: '30px',
+        flexGrow: 1,
+        backgroundColor: theme.palette.primary.main
+    },
+    iconButton: {
+        padding: 10,
     },
     messages_area: {
 
-        backgroundImage: 'url(/background.png)',
+        backgroundImage: 'url(/wa_bg.png)',
+        //backgroundRepeat: 'no-repeat',
+        backgroundSize: 'inherit',
         height: theme.spacing(70),
-        overflowY: 'scroll'
+        overflowY: 'scroll',
+        flexGrow: 1
     },
     no_messages_area: {
         height: theme.spacing(70)
     },
-    message_form_area: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        marginTop: '10px',
-        marginBottom: '10px',
-        backgroundColor: '#ebebeb',
-        borderRadius: '30px'
-    },
-
-    inputInput: {
-        padding: theme.spacing(1, 1, 1, 0),
-        borderRadius: '30px',
-        backgroundColor: 'white',
-        // vertical padding + font size from searchIcon
-        paddingLeft: `calc(1em + ${theme.spacing(1)}px)`,
-        transition: theme.transitions.create('width'),
-        width: '100%',
-
-    },
 
     reciever_background: {
-        backgroundColor: '#dcf8c6',
+        backgroundColor: '#009688',
     },
 
     sender_background: {
-        backgroundColor: '#ffffff'
+        backgroundColor: '#1f232a'
     },
     hover_effect: {
         '&:hover': {
@@ -76,29 +77,57 @@ const useStyles = makeStyles((theme) => ({
     },
     hide_input: {
         display: 'none'
-    }
+    },
+    menuButton: {
+        //marginRight: theme.spacing(0.5),
+    },
+    toolbar: {
+
+        '& .MuiListItemText-primary': {
+            fontWeight: 'bold',
+            color: 'white'
+        },
+        "& .MuiListItemText-secondary": {
+            color: 'white',
+            [theme.breakpoints.down('xs')]: {
+                display: 'none'
+            }
+        }
+    },
+    title: {
+        flexGrow: 1,
+        alignSelf: 'center',
+    },
+    bottomappBar: {
+        top: 'auto',
+        bottom: 0,
+    },
+    input: {
+        color: 'lightgray',
+        flex: 0.9
+    },
+
 
 
 }));
 
-
-const getTime = (timestamp) => {
-    const currentDate = new Date(timestamp)
-    const hour = currentDate.getHours()
-    const serializedHour = hour < 10 ? `0${hour}` : hour
-    const mins = currentDate.getMinutes()
-    const serializedMins = mins < 10 ? `0${mins}` : mins
-    return `${serializedHour}:${serializedMins}`
+const fetcher = async (uri) => {
+    const res = await fetch(uri)
+    const data = await res.json();
+    return data
 }
-
 
 function Chatarea({ user, chat }) {
     const classes = useStyles()
     const inputEl = useRef(null);
-
-    const { messages, participants, owner, name } = chat
-
-    //console.log(participants)
+    const [message, setmessage] = useState('')
+    const { id, messages, participants, owner, name } = chat
+    // console.log(id)
+    const { data } = useSWR(`/api/messages/${id}`, fetcher, {
+        revalidateOnMount: true,
+        revalidateOnFocus: false
+    })
+    //console.log(data)
     const submitMessage = (message, id) => {
         // const body = { message, id }
 
@@ -106,34 +135,47 @@ function Chatarea({ user, chat }) {
 
         formData.append('message', message)
         formData.append('id', id)
+        inputEl.current.files[0] && formData.append('file', inputEl.current.files[0])
+        console.log(inputEl.current.files)
+        // console.log(message)
+        mutate(`/api/messages/${id}`, async (data) => {
 
-
-        fetch('http://localhost:3000/api/messages/post', {
-            method: 'POST',
-            body: formData
-        }).then(response => {
-            response.json()
-            console.log('Done!...')
-        }).catch(error => {
-            console.log(error)
+            const res = await fetch('http://localhost:3000/api/messages/post', {
+                method: 'POST',
+                body: formData
+            })
+            const json = await res.json()
+            return data && [...data, json]
         })
+        setmessage('')
+        inputEl.current.value = ""
         // const data = await res.json()
         // chatData.messages = [...chatData.messages, data]
+    }
+
+    const getTime = (timestamp) => {
+        const currentDate = new Date(timestamp)
+        const hour = currentDate.getHours()
+        const serializedHour = hour < 10 ? `0${hour}` : hour
+        const mins = currentDate.getMinutes()
+        const serializedMins = mins < 10 ? `0${mins}` : mins
+        return `${serializedHour}:${serializedMins}`
     }
 
     const submitFileMessage = () => {
         const formData = new FormData();
         formData.append('file', inputEl.current.files[0])
         formData.append('id', chatData.id);
-        fetch('http://localhost:3000/api/messages/post', {
-            method: 'POST',
-            body: formData
-        }).then(response => {
-            response.json()
-            console.log('Done!...')
-        }).catch(error => {
-            console.log(error)
+        mutate(`/api/messages/${id}`, async (data) => {
+
+            const res = await fetch('http://localhost:3000/api/messages/post', {
+                method: 'POST',
+                body: formData
+            })
+            const json = await res.json()
+            return data && [...data, json]
         })
+        // setmessage('')
     }
 
     const clickInput = (e) => {
@@ -141,100 +183,92 @@ function Chatarea({ user, chat }) {
         inputEl.current.click();
     }
 
-
-    if (!chat) return (
-        <div className={classes.root}>
-            <Box mx="auto" mt={10} display="flex" flexDirection="column" alignItems="center" className={classes.no_messages_area}>
-                <Avatar className={classes.large_avatar} src={owner?.name} alt='img' />
-
-                <Box mt={3} fontWeight="fontWeightLight" fontSize={30}>
-                    Keep your phone connected
-                </Box>
-                <Box mt={3} color="gray">
-                    WhatsApp connects to your phone to sync messages.  To reduce data
-                </Box>
-                <Box color="gray">
-                    usage, connect your phone
-                    to Wi-Fi.
-                </Box>
-                <Box width="100%" mt={3} className={classes.divider_background}>
-                </Box>
-
-            </Box>
-        </div>
-    )
-
     return (
 
         <div className={classes.root}>
-            <Box display="flex" justifyContent="space-between" flexWrap="nowrap" p={1.8} alignItems="center" className={classes.header}>
+            <React.Fragment>
+                <AppBar color='primary' position="static">
 
-                <Box display="flex" alignItems="center">
-                    <Avatar>R</Avatar>
-                    <Box ml={1}>
-                        <Box fontWeight="fontWeightBold">{name}</Box>
-                        <Box fontWeight="fontWeightRegular" color="gray">last seen {moment.duration(1, "minutes").humanize()} ago</Box>
-                    </Box>
-                </Box>
-                <Box display="none">
-                    <input type="file" ref={inputEl} onChange={submitFileMessage} />
-                </Box>
-                <Box display="flex" alignItems="center" color="gray">
-                    <SearchIcon />
+                    <Toolbar className={classes.toolbar}>
 
-                    <MoreVertIcon />
-                </Box>
-            </Box>
-            <Divider />
+                        <IconButton
+                            edge="start"
+                            className={classes.menuButton}
+                            color="inherit"
+                            aria-label="open drawer"
+                        >
+                            <Avatar src={participants && participants[0].participant.image} />
+                        </IconButton>
 
-            <Box display="flex" m={1.5} flexDirection="column-reverse" className={classes.messages_area}>
+                        <ListItemText
+                            primary={name}
+                            secondary={
+                                name &&
+                                <React.Fragment>
+                                    last seen {moment.duration(1, "minutes").humanize()}
+                                </React.Fragment>
+                            }
+                        />
+                        <ButtonBase edge="end" color="inherit">
+                            <SearchIcon />
+                        </ButtonBase>
+                        <ButtonBase aria-label="display more actions" edge="end" color="inherit">
+                            <MoreVertIcon />
+                        </ButtonBase>
+                    </Toolbar>
 
-                {messages && messages.map((message) =>
+                </AppBar>
 
-                    <Box p={1} alignSelf={message.owner.email === user.email ? 'flex-end' : 'flex-start'} key={message.id}>
-                        <Box className={message.owner.email === user.email ? classes.sender_background : classes.reciever_background} fontWeight="fontWeightRegular" borderRadius={16} p={1} width="fit-content">
-                            <Box fontWeight={700} textAlign="right" fontSize={13}>{message.owner.name === user.name ? user.name : owner.name}</Box>
-                            {message.isFile ? <img src={`/${user.id}/${message.body}`} width="200px" /> : message.body}
-                            <Box fontSize={11} textAlign="right" color="gray">{getTime(message.createdAt)}</Box>
+            </React.Fragment>
+
+
+            <Box display="flex" flexDirection="column-reverse" className={classes.messages_area}>
+                {data && data.map((el) =>
+
+                    <Box p={1} alignSelf={el.owner.email === user.email ? 'flex-end' : 'flex-start'} key={el.id}>
+                        <Box className={el.owner.email === user.email ? classes.sender_background : classes.reciever_background} fontWeight="fontWeightRegular" borderRadius={10} p={1} width="fit-content">
+                            <Box fontWeight={700} textAlign="right" display='none' fontSize={13}>{el.owner.name === user.name ? user.name : name}</Box>
+                            {el.file ? <img src={`/${user.id}/${el.file}`} width="200px" /> : <React.Fragment></React.Fragment>}
+                            <div ><span style={{ fontSize: 14, fontWeight: 400, paddingBottom: 0, color: 'lightgray' }}>{el.body}</span>
+                                <span style={{ fontSize: 11, color: 'lightgray', marginLeft: '10px' }}>{getTime(el.createdAt)}</span></div>
                         </Box>
                     </Box>
                 )}
-
             </Box>
-            <Box className={classes.message_form_area}>
-                <IconButton>
-                    <MoodIcon color="disabled" />
-                </IconButton>
-                <IconButton onClick={(e) => clickInput(e)}>
-                    <AttachFileSharpIcon />
-                </IconButton>
+            <React.Fragment>
+                <AppBar position="relative" color="primary" style={{ height: 62 }}>
+                    <Toolbar >
+                        <ButtonBase edge="start" color="inherit" aria-label="open drawer">
+                            <MoodIcon />
+                        </ButtonBase>
+                        <div className={classes.grow} />
+                        <ButtonBase color="inherit" onClick={(e) => clickInput(e)}>
+                            <AttachFileSharpIcon />
+                        </ButtonBase>
+                        <input type="file" ref={inputEl} style={{ display: 'none' }} />
+                        <Paper component="form" className={classes.searchChat} elevation={0} onSubmit={(e) => {
+                            e.preventDefault()
+                            submitMessage(message, id)
+                        }}>
+                            <ButtonBase className={classes.iconButton} type='submit'>
+                                <SearchIcon />
+                            </ButtonBase>
 
-                <InputBase
-                    placeholder="Type a message"
-                    classes={{
-                        root: classes.inputRoot,
-                        input: classes.inputInput,
-                    }}
-                    inputProps={{ 'aria-label': 'search' }}
-                    fullWidth
-                    value=''
-                    onChange={(e) => setmessage(e.target.value)}
-                />
-
-                <Box color="gray" display="flex" p={1} ml={2} flexDirection="row" alignItems="center" className={classes.hover_effect}>
-
-                    <Box onClick={(e) => {
-                        e.preventDefault();
-                        submitMessage(chatData.id)
-                        setmessage("")
-                    }}><SendIcon /></Box>
-                    <Box> <MicIcon /></Box>
-
-
-                </Box>
-            </Box>
-
-        </div>
+                            <InputBase
+                                className={classes.input}
+                                placeholder="Type a message...."
+                                inputProps={{ 'aria-label': 'naked' }}
+                                value={message}
+                                onChange={(e) => setmessage(e.target.value)}
+                            />
+                        </Paper>
+                        <ButtonBase edge="end" color="inherit">
+                            <MicIcon />
+                        </ButtonBase>
+                    </Toolbar>
+                </AppBar>
+            </React.Fragment>
+        </div >
     )
 }
 

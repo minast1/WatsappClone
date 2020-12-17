@@ -7,7 +7,7 @@ export default async (req, res) => {
         data: {
             name: faker.name.findName(),
             email: faker.internet.email(),
-            image: faker.image.people()
+            image: faker.image.avatar()
         }
     })
     res.json(user)
