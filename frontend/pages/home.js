@@ -13,7 +13,7 @@ import AccessDenied from '../components/AccessDenied'
 import useSWR from 'swr'
 import Welcome from '../components/Welcome'
 import { useRouter } from 'next/router'
-import redirect from 'nextjs-redirect'
+
 
 
 

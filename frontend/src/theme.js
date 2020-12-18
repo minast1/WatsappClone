@@ -70,7 +70,7 @@ const theme = createMuiTheme({
                 color: 'gray'
             }
         }
-    }
+    },
 
 });
 

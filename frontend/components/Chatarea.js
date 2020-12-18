@@ -8,8 +8,9 @@ import AttachFileSharpIcon from '@material-ui/icons/AttachFileSharp';
 import SearchIcon from '@material-ui/icons/Search';
 import Pusher from 'pusher-js';
 import moment from 'moment'
-import useSWR, { mutate } from 'swr'
-//import fetcher from '../pages/home'
+import useSWR, { mutate } from 'swr';
+
+
 import MessageBox from './MessageBox'; import Welcome from './Welcome';
 
 
@@ -48,7 +49,19 @@ const useStyles = makeStyles((theme) => ({
         backgroundSize: 'inherit',
         height: theme.spacing(70),
         overflowY: 'scroll',
-        flexGrow: 1
+        overflowX: 'scroll',
+        flexGrow: 1,
+        '&::-webkit-scrollbar': {
+            width: '0.5em'
+        },
+        '&::-webkit-scrollbar-track': {
+            boxShadow: 'inset 0 0 6px rgba(0,0,0,0.00)',
+            webkitBoxShadow: 'inset 0 0 6px rgba(0,0,0,0.00)'
+        },
+        '&::-webkit-scrollbar-thumb': {
+            backgroundColor: theme.palette.primary.main,
+            //outline: '1px solid slategrey'
+        }
     },
     no_messages_area: {
         height: theme.spacing(70)
@@ -94,6 +107,11 @@ const useStyles = makeStyles((theme) => ({
             }
         }
     },
+    messageBox: {
+        [theme.breakpoints.down('xs')]: {
+            margin: '3px'
+        }
+    },
     title: {
         flexGrow: 1,
         alignSelf: 'center',
@@ -127,9 +145,8 @@ function Chatarea({ user, chat }) {
         revalidateOnMount: true,
         revalidateOnFocus: false
     })
-    //console.log(data)
+
     const submitMessage = (message, id) => {
-        // const body = { message, id }
 
         const formData = new FormData();
 
@@ -149,8 +166,6 @@ function Chatarea({ user, chat }) {
         })
         setmessage('')
         inputEl.current.value = ""
-        // const data = await res.json()
-        // chatData.messages = [...chatData.messages, data]
     }
 
     const getTime = (timestamp) => {
@@ -162,21 +177,6 @@ function Chatarea({ user, chat }) {
         return `${serializedHour}:${serializedMins}`
     }
 
-    const submitFileMessage = () => {
-        const formData = new FormData();
-        formData.append('file', inputEl.current.files[0])
-        formData.append('id', chatData.id);
-        mutate(`/api/messages/${id}`, async (data) => {
-
-            const res = await fetch('http://localhost:3000/api/messages/post', {
-                method: 'POST',
-                body: formData
-            })
-            const json = await res.json()
-            return data && [...data, json]
-        })
-        // setmessage('')
-    }
 
     const clickInput = (e) => {
         e.preventDefault();
@@ -225,12 +225,18 @@ function Chatarea({ user, chat }) {
             <Box display="flex" flexDirection="column-reverse" className={classes.messages_area}>
                 {data && data.map((el) =>
 
-                    <Box p={1} alignSelf={el.owner.email === user.email ? 'flex-end' : 'flex-start'} key={el.id}>
-                        <Box className={el.owner.email === user.email ? classes.sender_background : classes.reciever_background} fontWeight="fontWeightRegular" borderRadius={10} p={1} width="fit-content">
-                            <Box fontWeight={700} textAlign="right" display='none' fontSize={13}>{el.owner.name === user.name ? user.name : name}</Box>
-                            {el.file ? <img src={`/${user.id}/${el.file}`} width="200px" /> : <React.Fragment></React.Fragment>}
-                            <div ><span style={{ fontSize: 14, fontWeight: 400, paddingBottom: 0, color: 'lightgray' }}>{el.body}</span>
-                                <span style={{ fontSize: 11, color: 'lightgray', marginLeft: '10px' }}>{getTime(el.createdAt)}</span></div>
+                    <Box p={1} alignSelf={el.owner.email === user.email ? 'flex-start' : 'flex-end'} key={el.id} ml={el.owner.email === user.email ? 10 : 0}
+                        mr={el.owner.email === user.email ? 0 : 10} className={classes.messageBox} >
+                        <Box style={{ paddingTop: 2, paddingBottom: 0 }} className={el.owner.email === user.email ? classes.sender_background : classes.reciever_background}
+                            fontWeight="fontWeightRegular" borderRadius={10} p={1} width="fit-content">
+                            <Typography fontWeight={700} textAlign="right" style={{ display: 'none' }} fontSize={13} >{el.owner.name === user.name ? user.name : name}</Typography>
+                            {el.file ? <img src={`/${user.id}/${el.file}`} width="300px" style={{ paddingTop: '5px' }} height="fit-content" /> : <React.Fragment></React.Fragment>}
+
+                            <span style={{ display: 'flex' }}>
+                                {el.body ? <Typography style={{ fontSize: 15, fontWeight: 400, color: 'lightgray' }}>{el.body}</Typography> :
+                                    <React.Fragment></React.Fragment>}
+                                <Typography style={{ fontSize: 11, color: 'lightgray', paddingTop: '10px', paddingLeft: '25px', marginLeft: 'auto' }}
+                                >{getTime(el.createdAt)}</Typography></span>
                         </Box>
                     </Box>
                 )}

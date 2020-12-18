@@ -79,6 +79,16 @@ const useStyles = makeStyles((theme) => ({
         width: '100%'
 
     },
+    appBarIconContainer: {
+
+        '& .MuiButtonBase-root': {
+
+            [theme.breakpoints.down('md')]: {
+                padding: '3px'
+            },
+
+        }
+    }
 
 }));
 
@@ -114,7 +124,7 @@ export default function Sidearea({ user, getChat }) {
                         >
                             <Avatar src={user.image ? user.image : '/avatar.jpg'} />
                         </IconButton>
-                        <span style={{ marginLeft: 'auto' }}>
+                        <span style={{ marginLeft: 'auto' }} className={classes.appBarIconContainer}>
                             <ButtonBase edge="end" color="inherit" >
                                 <DonutLargeSharpIcon />
                             </ButtonBase>
