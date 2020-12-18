@@ -235,7 +235,7 @@ function Chatarea({ user, chat }) {
                             <span style={{ display: 'flex' }}>
                                 {el.body ? <Typography style={{ fontSize: 15, fontWeight: 400, color: 'lightgray' }}>{el.body}</Typography> :
                                     <React.Fragment></React.Fragment>}
-                                <Typography style={{ fontSize: 11, color: 'lightgray', paddingTop: '10px', paddingLeft: '25px', marginLeft: 'auto' }}
+                                <Typography style={{ fontSize: 12, color: 'lightgray', paddingTop: '10px', paddingLeft: '25px', marginLeft: 'auto' }}
                                 >{getTime(el.createdAt)}</Typography></span>
                         </Box>
                     </Box>
