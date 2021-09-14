@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+  //previewFeatures = ["uncheckedScalarInputs"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  name      String?
+  email     String?   @unique
+  image     String?
+  messages  Message[] // A user can have many todos
+  createdAt DateTime  @default(now()) @map(name: "created_at")
+  updatedAt DateTime  @default(now()) @map(name: "updated_at")
+  //A user, who may be a sender or a reciever may be involved in many chats
+  sender    Chat[]    @relation("sender")
+  reciever  Chat[]    @relation("reciever")
+
+
+  @@map(name: "users")
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  text      String?
+  owner     User     @relation(fields: [userId], references: [id])
+  userId    Int
+  chatId    Int
+  image     String?
+  video     String?
+  audio     String?
+  pending   Boolean  @default(true)
+  sent      Boolean  @default(false)
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @default(now()) @map(name: "updated_at")
+
+
+  @@map(name: "messages")
+}
+
+model Chat {
+  id         Int      @id @default(autoincrement())
+  sender     User?    @relation("sender", fields: [senderId], references: [id])
+  senderId   Int?
+  reciever   User?    @relation("reciever", fields: [recieverId], references: [id])
+  recieverId Int?
+  createdAt  DateTime @default(now())
+
+}
+
+//model File {
+//id        Int      @id @default(autoincrement())
+//name      String   @unique
+//owner     User?    @relation(fields: [userId], references: [id])
+//userId    Int?
+//createdAt DateTime @default(now()) @map(name: "created_at")
+//updatedAt DateTime @default(now()) @map(name: "updated_at")
+
+// @@map(name: "files")
+//}
+
+//model UsersChats {
+//chat  Chat  @relation(fields:[chatId], references: [id])
+// chatId   Int
+// participant User @relation(fields:[participantId] , references: [id])
+// participantId Int
+// createdAt   DateTime @default(now())
+//
+// @@id([chatId, participantId])
+//}

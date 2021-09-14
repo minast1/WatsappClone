@@ -2,7 +2,7 @@
 import styles from '../styles/Home.module.css'
 import React, { useEffect, useState } from 'react'
 import Loading from '../components/loading'
-import { getSession, useSession } from 'next-auth/client'
+//import { getSession, useSession } from 'next-auth/client'
 import Head from 'next/head'
 import { Avatar, Box, Card, CardHeader, Container, IconButton, makeStyles, Paper } from '@material-ui/core'
 import Sidearea from '../components/Sidearea'
@@ -10,7 +10,7 @@ import Chatarea from '../components/Chatarea'
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import Divider from '@material-ui/core/Divider';
 import AccessDenied from '../components/AccessDenied'
-import useSWR from 'swr'
+//import useSWR from 'swr'
 import Welcome from '../components/Welcome'
 import { useRouter } from 'next/router'
 
@@ -43,30 +43,21 @@ const useStyles = makeStyles((theme) => ({
     }
 }))
 
-const fetcher = async (uri) => {
-    const res = await fetch(uri)
-    const data = await res.json();
-    return data
-}
-export { fetcher }
 
-const Home = ({ chats, session }) => {
-    const { data } = useSWR('api/chats/all', fetcher, {
-        initialData: chats,
-        revalidateOnFocus: false
-    })
+const Home = ( ) => {
+ 
 
     const [chat, setchat] = useState(null)
     const classes = useStyles()
 
-    const redirectTo = (url) => {
-        return router.push(url)
+    const redirectTo = () => {
+        return //router.push(url)
     }
     // console.log(chat)
-    if (!session) {
+    /*if () {
         return <AccessDenied />
     }
-
+*/
 
 
     return (
@@ -79,8 +70,8 @@ const Home = ({ chats, session }) => {
 
             <Container disableGutters={true} maxWidth='xl' className={classes.container}>
 
-                <Sidearea user={session.user} getChat={setchat} />
-                {chat ? <Chatarea user={session.user} chat={chat} /> : <Welcome user={session.user} />}
+                <Sidearea user={ } getChat={} />
+                {chat ? <Chatarea user={} chat={chat} /> : <Welcome user={session.user} />}
 
             </Container>
         </div>
@@ -91,16 +82,7 @@ const Home = ({ chats, session }) => {
 export async function getServerSideProps(context) {
     let chats = null
     const session = await getSession(context);
-    if (session) {
-        let res = await fetch('http://localhost:3000/api/chats/all', {
-            headers: {
-                cookie: context.req.headers.cookie
-            }
-        })
-
-        chats = await res.json();
-    }
-
+   
     //req.headers.cookies = session;
     return {
         props: {
